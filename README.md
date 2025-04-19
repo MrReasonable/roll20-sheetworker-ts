@@ -1,6 +1,11 @@
-# roll20-sheetworker-ts
+# 🎲 Roll20 SheetWorker TypeScript Definitions
 
-Roll20 SheetWorker TypeScript definitions
+[![npm version](https://img.shields.io/npm/v/roll20-sheetworker-ts.svg)](https://www.npmjs.com/package/roll20-sheetworker-ts)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/MrReasonable/roll20-sheetworker-ts/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
+[![GitHub issues](https://img.shields.io/github/issues/MrReasonable/roll20-sheetworker-ts.svg)](https://github.com/MrReasonable/roll20-sheetworker-ts/issues)
+
+Comprehensive TypeScript type definitions for Roll20's SheetWorker API, enabling type-safe character sheet development.
 
 ## Introduction
 
@@ -9,13 +14,14 @@ This package provides TypeScript definitions for Roll20's SheetWorker API, allow
 ## Installation
 
 ```bash
+# NPM
 npm install roll20-sheetworker-ts --save-dev
-```
 
-Or using yarn:
-
-```bash
+# Yarn
 yarn add roll20-sheetworker-ts --dev
+
+# PNPM
+pnpm add roll20-sheetworker-ts -D
 ```
 
 ## Usage
@@ -38,10 +44,10 @@ on('sheet:opened', () => {
 
 ## Features
 
-- Complete type definitions for Roll20 SheetWorker functions
-- IntelliSense/autocompletion support in compatible editors
-- Type checking to catch errors before runtime
-- Documentation comments for API methods
+- ✅ Complete type definitions for Roll20 SheetWorker functions
+- 🔍 IntelliSense/autocompletion support in compatible editors
+- 🛡️ Type checking to catch errors before runtime
+- 📚 Detailed documentation comments for all API methods
 
 ## API Coverage
 
@@ -55,13 +61,14 @@ This package includes TypeScript definitions for:
 
 ## Contributing
 
-Contributions are welcome! If you find missing or incorrect definitions, please open an issue or submit a pull request.
+Contributions are welcome! If you find missing or incorrect definitions, please open an issue or submit a pull request on the [GitHub repository](https://github.com/MrReasonable/roll20-sheetworker-ts).
 
 ## License
 
-MIT
+This project is licensed under the [MIT License](https://github.com/MrReasonable/roll20-sheetworker-ts/blob/main/LICENSE).
 
 ## Resources
 
 - [Roll20 API Documentation](https://wiki.roll20.net/Sheet_Worker_Scripts)
 - [Roll20 Character Sheet Development](https://wiki.roll20.net/Building_Character_Sheets)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
