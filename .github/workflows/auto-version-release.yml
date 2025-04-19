@@ -1,0 +1,75 @@
+name: Auto Version and Release
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  auto-version-release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Determine version bump type
+        id: bump-type
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$PR_TITLE" == *"#major"* ]]; then
+            echo "type=major" >> $GITHUB_OUTPUT
+          elif [[ "$PR_TITLE" == *"#minor"* ]]; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          else
+            echo "type=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install npm-version-up
+        run: npm install -g npm-version-up
+
+      - name: Bump version
+        id: version-bump
+        run: |
+          BUMP_TYPE="${{ steps.bump-type.outputs.type }}"
+          echo "Bumping $BUMP_TYPE version"
+          NEW_VERSION=$(npx npm-version-up --$BUMP_TYPE)
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Commit version update
+        run: |
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.version-bump.outputs.version }} [skip ci]"
+          git push
+
+      - name: Create Tag
+        run: |
+          git tag -a v${{ steps.version-bump.outputs.version }} -m "Release v${{ steps.version-bump.outputs.version }}"
+          git push origin v${{ steps.version-bump.outputs.version }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version-bump.outputs.version }}
+          name: Release v${{ steps.version-bump.outputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

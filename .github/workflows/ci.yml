@@ -80,16 +80,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       
-      - name: Version and publish for tags
+      - name: Publish for tags
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          # Extract version from tag (remove 'v' prefix)
-          VERSION=${GITHUB_REF#refs/tags/v}
-          
-          # Update package.json version
-          pnpm version $VERSION --no-git-tag-version
-          
-          # Publish to npm
+          # Since auto-version-release.yml already updated package.json,
+          # we can publish directly without modifying the version again
           pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
