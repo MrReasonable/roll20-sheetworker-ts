@@ -1,0 +1,32 @@
+{
+  "name": "roll20-sheetworker-ts",
+  "version": "0.0.1",
+  "description": "TypeScript Types for Roll20 SheetWorker scripts.",
+  "keywords": [
+    "Typescript",
+    "Roll20",
+    "SheetWorker"
+  ],
+  "homepage": "https://github.com/MrReasonable/roll20-sheetworker-ts#readme",
+  "bugs": {
+    "url": "https://github.com/MrReasonable/roll20-sheetworker-ts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrReasonable/roll20-sheetworker-ts.git"
+  },
+  "license": "MIT",
+  "author": "MrReasonable",
+  "type": "commonjs",
+  "main": "",
+  "types": "index.d.ts",
+  "scripts": {
+    "lint": "eslint . --ext .ts,.d.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "eslint": "^9.25.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.30.1"
+  }
+}
