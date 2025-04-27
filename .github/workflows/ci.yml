@@ -44,7 +44,7 @@ jobs:
       - name: Run linting
         run: pnpm lint
 
-  publish:
+  build-and-publish:
     needs: lint
     if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
@@ -79,6 +79,9 @@ jobs:
       
       - name: Install dependencies
         run: pnpm install
+      
+      - name: Build TypeScript
+        run: pnpm build
       
       - name: Publish for tags
         if: startsWith(github.ref, 'refs/tags/v')
