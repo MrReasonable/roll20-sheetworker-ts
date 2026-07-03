@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/MrReasonable/roll20-sheetworker-ts/compare/roll20-sheetworker-ts-v1.3.1...roll20-sheetworker-ts-v1.4.0) (2026-07-03)
+
+
+### Features
+
+* model the roll breakdown as a discriminated union ([7de8213](https://github.com/MrReasonable/roll20-sheetworker-ts/commit/7de8213992485b6b3b022164d775f481e37da515))
+
 ## [1.3.1](https://github.com/MrReasonable/roll20-sheetworker-ts/compare/roll20-sheetworker-ts-v1.3.0...roll20-sheetworker-ts-v1.3.1) (2026-07-03)
 
 
