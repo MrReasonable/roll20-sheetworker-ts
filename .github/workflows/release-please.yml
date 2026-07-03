@@ -78,9 +78,10 @@ jobs:
   publish:
     name: Publish to npm
     needs: release-please
-    # Publish on a real release, or manually via workflow_dispatch (e.g. to
-    # publish a version whose GitHub release already exists).
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.release_created == 'true' }}
+    # Only when release-please actually cut a release (never on workflow_dispatch:
+    # dispatch runs publish in parallel with auto-merge and would publish the
+    # pre-merge version). Recover a failed publish by re-running that run's job.
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
