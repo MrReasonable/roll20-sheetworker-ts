@@ -10,6 +10,8 @@ import {
   getTranslationByKey,
   getTranslationLanguage,
   setDefaultToken,
+  startRoll,
+  finishRoll,
   type EventInfo,
 } from '../src/index'
 
@@ -45,3 +47,15 @@ void lang
 void label
 
 setDefaultToken({ bar1_value: 10, name: 'Hero', represents: null })
+
+// Custom Roll Parsing.
+on('clicked:attack', () => {
+  startRoll('&{template:default} {{roll1=[[1d20]]}}', (results) => {
+    const total: number = results.results.roll1.result
+    const dice: number[] = results.results.roll1.dice
+    const sides: number = results.results.roll1.rolls[0].sides
+    void dice
+    void sides
+    finishRoll(results.rollId, { roll1: total % 4 })
+  })
+})

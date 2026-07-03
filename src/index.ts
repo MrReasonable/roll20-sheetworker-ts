@@ -1,10 +1,13 @@
 /**
  * Roll20 Sheet Worker Scripts — TypeScript definitions.
  *
- * Sourced from the official Sheet Worker Scripts documentation:
- *   https://help.roll20.net/hc/en-us/articles/360037773513-Sheet-Worker-Scripts
+ * Sourced from the official Roll20 documentation:
+ *   - Sheet Worker Scripts:
+ *     https://help.roll20.net/hc/en-us/articles/360037773513-Sheet-Worker-Scripts
+ *   - Custom Roll Parsing (startRoll / finishRoll):
+ *     https://help.roll20.net/hc/en-us/articles/4403865972503-Custom-Roll-Parsing-for-Character-Sheets
  *
- * Verified against the current (live) version of the above on 2026-07-03.
+ * Verified against the current (live) versions of the above on 2026-07-03.
  */
 
 /** Information passed to sheet-worker event handlers. */
@@ -101,4 +104,58 @@ export declare function getTranslationLanguage(): string;
  */
 export declare function setDefaultToken(
   values: Record<string, string | number | boolean | null>
+): void;
+
+/* --- Custom Roll Parsing --- */
+
+/** A single sub-roll within an expression (e.g. the `4d20` part of `4d20+2d4`). */
+export interface SubRoll {
+  /** Number of dice rolled (the `4` in `4d20`). */
+  dice: number;
+  /** Number of sides per die (the `20` in `4d20`). */
+  sides: number;
+  /** The result of each individual die. */
+  results: number[];
+}
+
+/** The roll-server result for one named roll field in a template. */
+export interface RollResult {
+  /** The total result of the roll, as calculated by the roll server. */
+  result: number;
+  /** Ordered array of the results of all dice in this roll. */
+  dice: number[];
+  /** The original expression, e.g. `"4d20+2d4"`. */
+  expression: string;
+  /** Breakdown of each sub-roll (each part of the expression is rolled separately). */
+  rolls: SubRoll[];
+}
+
+/** The object passed to the `startRoll` callback. */
+export interface StartRollResults {
+  /** Unique identifier for this roll; pass it to `finishRoll`. */
+  rollId: string;
+  /** Roll results keyed by the roll-field names used in the template. */
+  results: Record<string, RollResult>;
+}
+
+/**
+ * Initiates a roll for custom parsing. The roll waits (up to 5 seconds) for a
+ * matching `finishRoll()` before posting to chat.
+ * @param roll The roll string (generally a roll-template string).
+ * @param callback Receives the roll-server results.
+ */
+export declare function startRoll(
+  roll: string,
+  callback?: (results: StartRollResults) => void
+): void;
+
+/**
+ * Finishes a roll started by `startRoll()`, optionally supplying computed
+ * results. Reference computed values in a template as `computed::<rollname>`.
+ * @param rollId The `rollId` from the `startRoll` callback.
+ * @param computedResults Map of roll-field names to computed values.
+ */
+export declare function finishRoll(
+  rollId: string,
+  computedResults?: Record<string, string | number>
 ): void;

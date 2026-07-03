@@ -16,3 +16,9 @@ on('sheet:opened', () => {
 
 void getTranslationLanguage()
 void getTranslationByKey('key')
+
+on('clicked:save', () => {
+  startRoll('{{roll1=[[1d20]]}}', (results) => {
+    finishRoll(results.rollId, { roll1: results.results.roll1.result })
+  })
+})
