@@ -22,6 +22,8 @@ declare global {
   const getTranslationByKey: typeof SW.getTranslationByKey
   const getTranslationLanguage: typeof SW.getTranslationLanguage
   const setDefaultToken: typeof SW.setDefaultToken
+  const startRoll: typeof SW.startRoll
+  const finishRoll: typeof SW.finishRoll
 }
 
 export {}
