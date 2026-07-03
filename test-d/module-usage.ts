@@ -1,0 +1,47 @@
+// Type-level smoke tests for the module (import) entry point.
+// Compiled by `pnpm run test:types` — no runtime, existence is the assertion.
+import {
+  on,
+  getAttrs,
+  setAttrs,
+  getSectionIDs,
+  generateRowID,
+  removeRepeatingRow,
+  getTranslationByKey,
+  getTranslationLanguage,
+  setDefaultToken,
+  type EventInfo,
+} from '../src/index'
+
+on('change:strength', (info: EventInfo) => {
+  void info.sourceAttribute
+  void info.sourceType
+  // getAttrs supports the `_max` suffix; values are strings keyed by request.
+  getAttrs(['strength', 'strength_max'], (values) => {
+    const cur: string = values.strength
+    const max: string = values.strength_max
+    void max
+    setAttrs(
+      { strength_mod: Math.floor((Number(cur) - 10) / 2) },
+      { silent: true },
+      () => {}
+    )
+  })
+})
+
+on('sheet:opened', () => {
+  getSectionIDs('inventory', (ids) => {
+    ids.forEach((id) => removeRepeatingRow(`repeating_inventory_${id}`))
+    const newId: string = generateRowID()
+    setAttrs({ [`repeating_inventory_${newId}_qty`]: 1 })
+  })
+})
+
+on('clicked:roll', (info) => void info.sourceAttribute)
+
+const lang: string = getTranslationLanguage()
+const label: string | false = getTranslationByKey('some_key')
+void lang
+void label
+
+setDefaultToken({ bar1_value: 10, name: 'Hero', represents: null })

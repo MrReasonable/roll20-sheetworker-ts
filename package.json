@@ -1,6 +1,6 @@
 {
   "name": "roll20-sheetworker-ts",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "TypeScript Types for Roll20 SheetWorker scripts.",
   "keywords": [
     "Typescript",
@@ -20,11 +20,23 @@
   "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint . --ext .ts,.d.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:types": "tsc --noEmit -p test-d/tsconfig.json",
     "build": "tsc",
     "prepublishOnly": "pnpm run build"
   },
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./global": {
+      "types": "./dist/global.d.ts",
+      "default": "./dist/global.js"
+    }
+  },
   "files": [
     "dist"
   ],

@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Keep GitHub Actions (including SHA-pinned ones) up to date.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Keep npm dev dependencies up to date.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      npm-dev:
+        patterns: ["*"]

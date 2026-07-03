@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  # Only fire when a pull request is MERGED into main — never on direct pushes.
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+
+# The GitHub App token (below) carries the write/PR permissions; the default
+# GITHUB_TOKEN stays read-only.
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    # Skip PRs that were closed without merging (and allow manual dispatch).
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true }}
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          # Always operate on main (the workflow now runs on pull_request, whose
+          # context ref is the PR, not the base branch).
+          target-branch: main
+
+  # Auto-merge the open release PR. Runs on pushes where release-please did NOT
+  # cut a release (i.e. it opened/updated a pending release PR). Merging that PR
+  # produces the release commit, which on the next run makes release-please cut
+  # the release and trigger `publish`.
+  auto-merge:
+    name: Auto-merge release PR
+    needs: release-please
+    if: ${{ needs.release-please.result == 'success' && needs.release-please.outputs.release_created != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Find and merge the open release PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          PR_NUMBER=$(gh pr list --repo "$REPO" \
+            --label "autorelease: pending" --base main --state open \
+            --json number --jq '.[0].number // empty')
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No open release PR to merge — nothing to do."
+            exit 0
+          fi
+          echo "Merging release PR #${PR_NUMBER}."
+          # --rebase: repo convention (ruleset allows rebase only).
+          # --admin: the release-bot App is on the ruleset bypass list, so the
+          # underlying merge API call succeeds even if the client-side pre-check
+          # reports the PR as blocked.
+          gh pr merge "$PR_NUMBER" --repo "$REPO" --rebase --admin --delete-branch
+
+  publish:
+    name: Publish to npm
+    needs: release-please
+    # Publish on a real release, or manually via workflow_dispatch (e.g. to
+    # publish a version whose GitHub release already exists).
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC token for npm trusted publishing — no NPM_TOKEN needed
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          # Trusted publishing (OIDC) requires Node >= 22.14 and npm >= 11.5.1.
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Upgrade npm to an OIDC-capable version
+        run: npm install --global npm@latest
+
+      - name: Publish to npm (trusted publishing)
+        # No token: npm exchanges the workflow's OIDC id-token for short-lived
+        # publish credentials. Provenance is attached automatically. Scripts are
+        # skipped because we already built dist/ above.
+        run: npm publish --access public --ignore-scripts
