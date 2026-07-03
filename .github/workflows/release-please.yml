@@ -61,9 +61,18 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPO: ${{ github.repository }}
         run: |
-          PR_NUMBER=$(gh pr list --repo "$REPO" \
-            --label "autorelease: pending" --base main --state open \
-            --json number --jq '.[0].number // empty')
+          # Poll for the labelled release PR: release-please applies the
+          # "autorelease: pending" label a moment after opening the PR, so a
+          # single immediate query can race and miss it.
+          PR_NUMBER=""
+          for attempt in 1 2 3 4 5 6; do
+            PR_NUMBER=$(gh pr list --repo "$REPO" \
+              --label "autorelease: pending" --base main --state open \
+              --json number --jq '.[0].number // empty')
+            [ -n "$PR_NUMBER" ] && break
+            echo "No labelled release PR yet (attempt ${attempt}); waiting..."
+            sleep 5
+          done
           if [ -z "$PR_NUMBER" ]; then
             echo "No open release PR to merge — nothing to do."
             exit 0
