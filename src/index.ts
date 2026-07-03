@@ -120,36 +120,78 @@ export interface DieResult {
   d?: boolean;
 }
 
-/** Success/critical modifiers applied to a roll group. */
+/** A single modifier applied to a roll (keep/drop, exploding, reroll, …). */
+export interface RollMod {
+  /** The modifier name. */
+  name: string;
+  [key: string]: unknown;
+}
+
+/** Modifiers applied to a dice or grouped roll. */
 export interface RollMods {
+  /** Ordered list of applied modifiers. */
+  mod?: RollMod[];
+  /** Success-count comparison and threshold. */
   success?: { comp: string; point: number };
+  /** Failure-count comparison and threshold. */
   fail?: { comp: string; point: number };
   [key: string]: unknown;
 }
 
-/**
- * One entry in a roll's `rolls` breakdown. The `type` field discriminates the
- * shape — `"R"` dice roll, `"M"` math/operator, `"G"` grouped roll, `"C"`/`"L"`
- * comment/label — so the remaining fields are optional.
- */
-export interface RollGroup {
-  /** The roll-group type. */
-  type: string;
-  /** (dice) Number of dice rolled (the `4` in `4d20`). */
-  dice?: number;
-  /** (dice) Number of sides per die (the `20` in `4d20`). */
-  sides?: number;
-  /** (dice) The individual die results. */
-  results?: DieResult[];
-  /** (dice/group) Modifiers applied to the roll (success counting, keep/drop, …). */
+/** A dice roll (`type: "R"`) — e.g. the `4d20` in `4d20+2d4`. */
+export interface DiceRoll {
+  type: 'R';
+  /** Number of dice rolled (the `4` in `4d20`). */
+  dice: number;
+  /** Number of sides per die (the `20` in `4d20`). */
+  sides: number;
+  /** The individual die results. */
+  results: DieResult[];
+  /** Modifiers applied to this roll. */
   mods?: RollMods;
-  /** (math) The literal expression, e.g. `"+2"`. */
-  expr?: string;
-  /** (comment/label) The text content. */
-  text?: string;
-  /** (group) Nested roll groups. */
-  rolls?: RollGroup[][];
 }
+
+/** A math term (`type: "M"`) — an operator or constant, e.g. `"+"` or `"2"`. */
+export interface MathTerm {
+  type: 'M';
+  /** The literal expression. */
+  expr: string;
+}
+
+/** A grouped roll (`type: "G"`) — e.g. `{1d20,1d12}kh1`. */
+export interface GroupedRoll {
+  type: 'G';
+  /** The nested roll groups. */
+  rolls: RollGroup[][];
+  /** Modifiers applied to the group. */
+  mods?: RollMods;
+}
+
+/** An inline comment (`type: "C"`). */
+export interface RollComment {
+  type: 'C';
+  /** The comment text. */
+  text: string;
+}
+
+/** A label (`type: "L"`) — the text following a `[[ … ]]` roll. */
+export interface RollLabel {
+  type: 'L';
+  /** The label text. */
+  text: string;
+}
+
+/**
+ * One entry in a roll's `rolls` breakdown — a discriminated union on `type`.
+ * Kinds verified against the official Roll20 character sheets:
+ * `"R"` dice · `"M"` math · `"G"` group · `"C"` comment · `"L"` label.
+ */
+export type RollGroup =
+  | DiceRoll
+  | MathTerm
+  | GroupedRoll
+  | RollComment
+  | RollLabel;
 
 /** The roll-server result for one named roll field in a template. */
 export interface RollResult {
