@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/MrReasonable/roll20-sheetworker-ts/compare/roll20-sheetworker-ts-v1.3.0...roll20-sheetworker-ts-v1.3.1) (2026-07-03)
+
+
+### Bug Fixes
+
+* correct the Custom Roll Parsing result shape ([270c734](https://github.com/MrReasonable/roll20-sheetworker-ts/commit/270c73436b5c3bd9877896d12bb213b6c3cd2260))
+
 ## [1.3.0](https://github.com/MrReasonable/roll20-sheetworker-ts/compare/roll20-sheetworker-ts-v1.2.0...roll20-sheetworker-ts-v1.3.0) (2026-07-03)
 
 
