@@ -13,6 +13,7 @@ import {
   startRoll,
   finishRoll,
   type EventInfo,
+  type RollGroup,
 } from '../src/index'
 
 on('change:strength', (info: EventInfo) => {
@@ -53,15 +54,30 @@ on('clicked:attack', () => {
   startRoll('&{template:default} {{roll1=[[1d20]]}}', (results) => {
     const total: number = results.results.roll1.result
     const dice: number[] = results.results.roll1.dice
-    // Sub-roll breakdown (shape verified against the official character sheets).
-    const group = results.results.roll1.rolls[0]
-    const kind: string = group.type
-    const dieValue: number | undefined = group.results?.[0]?.v
-    const successPoint: number | undefined = group.mods?.success?.point
     void dice
-    void kind
-    void dieValue
-    void successPoint
+    // Sub-roll breakdown — a discriminated union on `type` (kinds verified
+    // against the official character sheets). Narrowing gives exact fields.
+    for (const group of results.results.roll1.rolls) {
+      const kind: string = group.type
+      void kind
+      if (group.type === 'R') {
+        const dieValue: number = group.results[0].v
+        const sides: number = group.sides
+        const successPoint: number | undefined = group.mods?.success?.point
+        void dieValue
+        void sides
+        void successPoint
+      } else if (group.type === 'M') {
+        const expr: string = group.expr
+        void expr
+      } else if (group.type === 'C' || group.type === 'L') {
+        const text: string = group.text
+        void text
+      } else {
+        const nested: RollGroup[][] = group.rolls
+        void nested
+      }
+    }
     finishRoll(results.rollId, { roll1: total % 4 })
   })
 })
