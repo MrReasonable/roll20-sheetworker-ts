@@ -53,9 +53,15 @@ on('clicked:attack', () => {
   startRoll('&{template:default} {{roll1=[[1d20]]}}', (results) => {
     const total: number = results.results.roll1.result
     const dice: number[] = results.results.roll1.dice
-    const sides: number = results.results.roll1.rolls[0].sides
+    // Sub-roll breakdown (shape verified against the official character sheets).
+    const group = results.results.roll1.rolls[0]
+    const kind: string = group.type
+    const dieValue: number | undefined = group.results?.[0]?.v
+    const successPoint: number | undefined = group.mods?.success?.point
     void dice
-    void sides
+    void kind
+    void dieValue
+    void successPoint
     finishRoll(results.rollId, { roll1: total % 4 })
   })
 })
