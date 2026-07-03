@@ -108,26 +108,59 @@ export declare function setDefaultToken(
 
 /* --- Custom Roll Parsing --- */
 
-/** A single sub-roll within an expression (e.g. the `4d20` part of `4d20+2d4`). */
-export interface SubRoll {
-  /** Number of dice rolled (the `4` in `4d20`). */
-  dice: number;
-  /** Number of sides per die (the `20` in `4d20`). */
-  sides: number;
-  /** The result of each individual die. */
-  results: number[];
+/**
+ * A single die within a dice roll group. (The CRP docs show `results` as a
+ * plain number array, but the roll server returns die objects — verified
+ * against the official Roll20 character sheets.)
+ */
+export interface DieResult {
+  /** The value rolled on this die. */
+  v: number;
+  /** True if the die was dropped (e.g. by keep/drop modifiers). */
+  d?: boolean;
+}
+
+/** Success/critical modifiers applied to a roll group. */
+export interface RollMods {
+  success?: { comp: string; point: number };
+  fail?: { comp: string; point: number };
+  [key: string]: unknown;
+}
+
+/**
+ * One entry in a roll's `rolls` breakdown. The `type` field discriminates the
+ * shape — `"R"` dice roll, `"M"` math/operator, `"G"` grouped roll, `"C"`/`"L"`
+ * comment/label — so the remaining fields are optional.
+ */
+export interface RollGroup {
+  /** The roll-group type. */
+  type: string;
+  /** (dice) Number of dice rolled (the `4` in `4d20`). */
+  dice?: number;
+  /** (dice) Number of sides per die (the `20` in `4d20`). */
+  sides?: number;
+  /** (dice) The individual die results. */
+  results?: DieResult[];
+  /** (dice/group) Modifiers applied to the roll (success counting, keep/drop, …). */
+  mods?: RollMods;
+  /** (math) The literal expression, e.g. `"+2"`. */
+  expr?: string;
+  /** (comment/label) The text content. */
+  text?: string;
+  /** (group) Nested roll groups. */
+  rolls?: RollGroup[][];
 }
 
 /** The roll-server result for one named roll field in a template. */
 export interface RollResult {
   /** The total result of the roll, as calculated by the roll server. */
   result: number;
-  /** Ordered array of the results of all dice in this roll. */
+  /** Ordered array of the values of all dice in this roll. */
   dice: number[];
   /** The original expression, e.g. `"4d20+2d4"`. */
   expression: string;
-  /** Breakdown of each sub-roll (each part of the expression is rolled separately). */
-  rolls: SubRoll[];
+  /** Per-sub-roll breakdown (each part of the expression is rolled separately). */
+  rolls: RollGroup[];
 }
 
 /** The object passed to the `startRoll` callback. */
